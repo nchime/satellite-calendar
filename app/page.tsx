@@ -19,11 +19,7 @@ import {
 interface Schedule { [key: string]: string[]; }
 interface Holiday { date: string; localName: string; name: string; }
 interface TooltipData { visible: boolean; content: string; x: number; y: number; }
-interface EditingScheduleInfo {
-  date: Date;
-  index: number;
-  text: string;
-}
+interface EditingScheduleInfo { date: Date; index: number; text: string; }
 
 // --- 메인 컴포넌트 ---
 export default function ContributionCalendar() {
@@ -31,12 +27,13 @@ export default function ContributionCalendar() {
   const [schedules, setSchedules] = useState<Schedule>({});
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [tooltip, setTooltip] = useState<TooltipData>({ visible: false, content: '', x: 0, y: 0 });
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newScheduleText, setNewScheduleText] = useState('');
   const [editingScheduleInfo, setEditingScheduleInfo] = useState<EditingScheduleInfo | null>(null);
   const [editedScheduleText, setEditedScheduleText] = useState('');
+  const [scheduleType, setScheduleType] = useState('personal');
 
   // --- 데이터 로딩 ---
   useEffect(() => {
@@ -50,6 +47,15 @@ export default function ContributionCalendar() {
     fetchHolidays();
   }, [currentYear]);
 
+  useEffect(() => {
+    const today = new Date();
+    if (currentYear === today.getFullYear()) {
+      setSelectedDay(today);
+    } else {
+      setSelectedDay(null);
+    }
+  }, [currentYear]);
+
   // --- 날짜 계산 ---
   const yearStart = startOfYear(new Date(currentYear, 0, 1));
   const yearEnd = endOfYear(new Date(currentYear, 11, 31));
@@ -58,8 +64,10 @@ export default function ContributionCalendar() {
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
   // --- 이벤트 핸들러 ---
-  const prevYear = () => { setSelectedDay(null); setCurrentYear(currentYear - 1); };
-  const nextYear = () => { setSelectedDay(null); setCurrentYear(currentYear + 1); };
+  const handleScheduleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => { setScheduleType(e.target.value); };
+  const prevYear = () => { setCurrentYear(currentYear - 1); };
+  const nextYear = () => { setCurrentYear(currentYear + 1); };
+  const goToCurrentYear = () => { setCurrentYear(new Date().getFullYear()); };
   const handleDayClick = (day: Date) => { setSelectedDay(day); };
 
   const handleAddModalSubmit = (e: React.FormEvent) => {
@@ -132,10 +140,10 @@ export default function ContributionCalendar() {
           <div className="modal-content">
             <h3>{format(selectedDay, 'yyyy-MM-dd')}</h3>
             <form onSubmit={handleAddModalSubmit}>
-              <input type="text" placeholder="새 일정 내용" value={newScheduleText} onChange={(e) => setNewScheduleText(e.target.value)} autoFocus required />
-              <div>
-                <button type="button" onClick={() => setIsAddModalOpen(false)}>취소</button>
-                <button type="submit">등록</button>
+              <textarea placeholder="새 일정 내용" value={newScheduleText} onChange={(e) => setNewScheduleText(e.target.value)} autoFocus required />
+              <div className="modal-actions">
+                <button type="button" className="modal-button-secondary" onClick={() => setIsAddModalOpen(false)}>취소</button>
+                <button type="submit" className="modal-button-primary">등록</button>
               </div>
             </form>
           </div>
@@ -147,10 +155,10 @@ export default function ContributionCalendar() {
           <div className="modal-content">
             <h3>일정 수정</h3>
             <form onSubmit={handleEditModalSubmit}>
-              <input type="text" value={editedScheduleText} onChange={(e) => setEditedScheduleText(e.target.value)} autoFocus required />
-              <div>
-                <button type="button" onClick={() => setIsEditModalOpen(false)}>취소</button>
-                <button type="submit">저장</button>
+              <textarea value={editedScheduleText} onChange={(e) => setEditedScheduleText(e.target.value)} autoFocus required />
+              <div className="modal-actions">
+                <button type="button" className="modal-button-secondary" onClick={() => setIsEditModalOpen(false)}>취소</button>
+                <button type="submit" className="modal-button-primary">저장</button>
               </div>
             </form>
           </div>
@@ -159,20 +167,38 @@ export default function ContributionCalendar() {
 
       <div className="calendar-wrapper">
         <div className="header">
-          <button onClick={prevYear}>이전 해</button>
+          <button onClick={prevYear} className="icon-button" title="이전 해">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button onClick={nextYear} className="icon-button" title="다음 해">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button onClick={goToCurrentYear}>올해</button>
           <h2>{currentYear}년</h2>
-          <button onClick={nextYear}>다음 해</button>
         </div>
         <div className="year-view-container">
+          <div className="grid-header">
+            <h4>{currentYear}년 활동 요약</h4>
+            <div className="schedule-type-selector">
+              <input type="radio" id="personal" name="scheduleType" value="personal" checked={scheduleType === 'personal'} onChange={handleScheduleTypeChange} />
+              <label htmlFor="personal">나의 일정</label>
+
+              <input type="radio" id="github" name="scheduleType" value="github" checked={scheduleType === 'github'} onChange={handleScheduleTypeChange} />
+              <label htmlFor="github">GitHub</label>
+
+              <input type="radio" id="shared" name="scheduleType" value="shared" checked={scheduleType === 'shared'} onChange={handleScheduleTypeChange} />
+              <label htmlFor="shared">공유 일정</label>
+            </div>
+          </div>
           <div className="calendar-body">
             <div className="day-labels">
-                <div className="day-label">S</div>
-                <div className="day-label">M</div>
-                <div className="day-label">T</div>
-                <div className="day-label">W</div>
-                <div className="day-label">T</div>
-                <div className="day-label">F</div>
-                <div className="day-label">S</div>
+              <div className="day-label">S</div>
+              <div className="day-label">M</div>
+              <div className="day-label">T</div>
+              <div className="day-label">W</div>
+              <div className="day-label">T</div>
+              <div className="day-label">F</div>
+              <div className="day-label">S</div>
             </div>
             <div className="calendar-grid">
               {days.map((day) => {
@@ -203,13 +229,14 @@ export default function ContributionCalendar() {
         {selectedDay && (
           <div className="selection-details-container">
               <button className="add-schedule-button" onClick={() => setIsAddModalOpen(true)}>새 일정 추가</button>
-                          <h3>{format(selectedDay, 'yyyy년 MM월 dd일')}</h3>
-                          {selectedDayInfo.holiday ? (
-                              <p><strong>공휴일: {selectedDayInfo.holiday.localName}</strong></p>
-                          ) : ((getDay(selectedDay) === 0 || getDay(selectedDay) === 6)) ? (
-                              <p><strong>휴일</strong></p>
-                          ) : null}
-                          <h4>일정 목록</h4>              {selectedDayInfo.schedules.length > 0 ? (
+              <h3>{format(selectedDay, 'yyyy년 MM월 dd일')}</h3>
+              {selectedDayInfo.holiday ? (
+                  <p><strong>공휴일: {selectedDayInfo.holiday.localName}</strong></p>
+              ) : ((getDay(selectedDay) === 0 || getDay(selectedDay) === 6)) ? (
+                  <p><strong>휴일</strong></p>
+              ) : null}
+              <h4>일정 목록</h4>
+              {selectedDayInfo.schedules.length > 0 ? (
                   <ul>
                       {selectedDayInfo.schedules.map((item, index) => (
                         <li key={index}>

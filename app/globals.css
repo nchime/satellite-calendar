@@ -13,12 +13,17 @@ body {
 
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: flex-start; /* Left-align items */
+  gap: 12px; /* Add space between items */
   margin-bottom: 20px;
+  padding: 0 10px;
 }
 
-.header h2 { margin: 0; }
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+}
 
 .header button {
   background: none;
@@ -26,6 +31,11 @@ body {
   padding: 5px 10px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.header .icon-button {
+    padding: 5px;
+    line-height: 0;
 }
 
 .custom-tooltip {
@@ -43,10 +53,28 @@ body {
 
 .year-view-container {
     display: inline-block; /* Shrink to fit content */
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid #d1d5da;
     border-radius: 6px;
     padding: 20px;
+}
+
+.selection-details-container {
+  position: relative; /* For positioning the add button */
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  min-height: 100px;
+}
+
+.form-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
 }
 
 .months-header {
@@ -162,16 +190,39 @@ body {
     margin-top: 0;
 }
 
-.modal-content form > input {
+.modal-content textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
+    border: 1px solid #d1d5da;
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 80px;
 }
 
-.modal-content form > div {
+.modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+}
+
+.modal-button-secondary {
+    background: none;
+    border: 1px solid #d1d5da;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.modal-button-primary {
+    background-color: #2ea44f;
+    color: white;
+    border: 1px solid rgba(27, 31, 35, 0.15);
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 h3 {
@@ -230,4 +281,44 @@ h3 {
   color: white;
   border-color: rgba(27, 31, 35, 0.15);
   cursor: pointer;
+}
+
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.grid-header h4 {
+  margin: 0;
+}
+
+.schedule-type-selector {
+  display: flex;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.schedule-type-selector input[type="radio"] {
+  display: none; /* Hide the actual radio button */
+}
+
+.schedule-type-selector label {
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  background-color: #f6f8fa;
+  border-left: 1px solid #d1d5da;
+  transition: background-color 0.2s ease;
+}
+
+.schedule-type-selector label:first-of-type {
+  border-left: none;
+}
+
+.schedule-type-selector input[type="radio"]:checked + label {
+  background-color: #0366d6;
+  color: white;
 }
